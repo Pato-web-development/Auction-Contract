@@ -29,7 +29,7 @@ contract NFTAuction is Ownable{
                 break;
             }
         }
-        require(isAdmin, "Only admins can perform this operation.");
+        require(isAdmin, "The admin is the only one that can modify admins!");
         _;
     }
 
@@ -73,10 +73,10 @@ contract NFTAuction is Ownable{
 
     function placeBid(uint256 _auctionId) public payable {
         AuctionItem storage item = auctionItems[_auctionId];
-        require(item.auctionStarted, "auction not started");
+        require(item.auctionStarted, "Auction not started!");
         require(
             msg.value > item.highestBid,
-            "Your bid must be higher than the current highest bid."
+            "Bid lower than highest bid!"
         );
         require(msg.value > item.startingPrice);
 
@@ -89,7 +89,7 @@ contract NFTAuction is Ownable{
     }
 
     function withdraw() public {
-        require(bids[msg.sender] > 0, "You don't have a bid.");
+        require(bids[msg.sender] > 0, "Bid first before you withdraw!");
 
         uint amount = (bids[msg.sender] * 9) / 10;
         bids[msg.sender] = 0;
@@ -101,7 +101,7 @@ contract NFTAuction is Ownable{
 
     function endAuction(uint256 _auctionId) public onlyAdmin {
         AuctionItem storage item = auctionItems[_auctionId];
-        require(item.auctionStarted, "Auction not in progress");
+        require(item.auctionStarted, "This auction is no longer available!");
 
         item.auctionStarted = false;
         if (item.highestBidder == address(0)) {
@@ -113,17 +113,14 @@ contract NFTAuction is Ownable{
             item.nftId
         );
 
-        // if (item.highestBidder != address(0)) {
-        //     payable(owner).transfer(item.highestBid);
-        // }
     }
 
     function withdrawNft(uint256 _auctionId, address _to) public onlyAdmin {
         AuctionItem storage item = auctionItems[_auctionId];
-        require(!item.auctionStarted, "Auction is still ongoing.");
+        require(!item.auctionStarted, "The auction has not ended!");
         require(
             item.nftAddress.ownerOf(item.nftId) == address(this),
-            "nft not present"
+            "You don't have NFTs!"
         );
         item.nftAddress.safeTransferFrom(address(this), _to, item.nftId);
     }
