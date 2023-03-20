@@ -98,6 +98,17 @@ contract NFTAuction is Ownable{
             bids[msg.sender] = amount;
         }
     }
+    
+    function withdrawNft(uint256 _auctionId, address _to) public onlyAdmin {
+        AuctionItem storage item = auctionItems[_auctionId];
+        require(!item.auctionStarted, "The auction has not ended!");
+        require(
+            item.nftAddress.ownerOf(item.nftId) == address(this),
+            "You don't have NFTs!"
+        );
+        item.nftAddress.safeTransferFrom(address(this), _to, item.nftId);
+    }
+
 
     function endAuction(uint256 _auctionId) public onlyAdmin {
         AuctionItem storage item = auctionItems[_auctionId];
@@ -115,17 +126,7 @@ contract NFTAuction is Ownable{
 
     }
 
-    function withdrawNft(uint256 _auctionId, address _to) public onlyAdmin {
-        AuctionItem storage item = auctionItems[_auctionId];
-        require(!item.auctionStarted, "The auction has not ended!");
-        require(
-            item.nftAddress.ownerOf(item.nftId) == address(this),
-            "You don't have NFTs!"
-        );
-        item.nftAddress.safeTransferFrom(address(this), _to, item.nftId);
-    }
-
-    receive() payable external {
+        receive() payable external {
 
     }
 
